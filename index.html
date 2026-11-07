@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🌐 國中生物與班級經營雲端總控儀表板 - Teacher Dashboard</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;900&family=Outfit:wght@600;800;900&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg-dark: #090d16;
+      --card-bg: #111827;
+      --card-border: rgba(255, 255, 255, 0.08);
+      --accent-gold: #f59e0b;
+      --accent-blue: #38bdf8;
+      --accent-green: #10b981;
+      --accent-purple: #a855f7;
+      --accent-rose: #f43f5e;
+      --text-main: #f8fafc;
+      --text-muted: #94a3b8;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Noto Sans TC', sans-serif;
+      background: radial-gradient(circle at 50% 0%, #1e293b 0%, #090d16 80%);
+      color: var(--text-main);
+      min-height: 100vh;
+      padding: 24px 16px 60px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    /* 頂部 Header */
+    header {
+      text-align: center;
+      margin-bottom: 36px;
+    }
+
+    .badge-top {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 14px;
+      border-radius: 9999px;
+      background: rgba(245, 158, 11, 0.15);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      color: var(--accent-gold);
+      font-size: 0.85rem;
+      font-weight: 700;
+      margin-bottom: 12px;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      font-weight: 900;
+      letter-spacing: -0.5px;
+      margin-bottom: 10px;
+      background: linear-gradient(135deg, #ffffff 40%, #cbd5e1 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    p.subtitle {
+      color: var(--text-muted);
+      font-size: 1.05rem;
+      max-width: 680px;
+      margin: 0 auto;
+      line-height: 1.6;
+    }
+
+    /* 總控入口四大卡片 Grid */
+    .halls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(270px, 1fr));
+      gap: 20px;
+      margin-bottom: 40px;
+    }
+
+    .hall-card {
+      background: var(--card-bg);
+      border: 1px solid var(--card-border);
+      border-radius: 20px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      position: relative;
+      overflow: hidden;
+      transition: transform 0.25s ease, border-color 0.25s ease, box-shadow 0.25s ease;
+    }
+
+    .hall-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.4);
+    }
+
+    .hall-1:hover { border-color: var(--accent-blue); }
+    .hall-2:hover { border-color: var(--accent-rose); }
+    .hall-3:hover { border-color: var(--accent-gold); }
+    .hall-4:hover { border-color: var(--accent-purple); }
+
+    .hall-icon-wrapper {
+      width: 54px;
+      height: 54px;
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.8rem;
+      margin-bottom: 16px;
+    }
+
+    .hall-1 .hall-icon-wrapper { background: rgba(56, 189, 248, 0.15); color: var(--accent-blue); }
+    .hall-2 .hall-icon-wrapper { background: rgba(244, 63, 94, 0.15); color: var(--accent-rose); }
+    .hall-3 .hall-icon-wrapper { background: rgba(245, 158, 11, 0.15); color: var(--accent-gold); }
+    .hall-4 .hall-icon-wrapper { background: rgba(168, 85, 247, 0.15); color: var(--accent-purple); }
+
+    .hall-title-row {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      margin-bottom: 8px;
+    }
+
+    .hall-title {
+      font-size: 1.25rem;
+      font-weight: 800;
+    }
+
+    .hall-tag {
+      font-size: 0.75rem;
+      font-weight: 700;
+      padding: 3px 8px;
+      border-radius: 6px;
+    }
+
+    .hall-1 .hall-tag { background: rgba(56, 189, 248, 0.2); color: var(--accent-blue); }
+    .hall-2 .hall-tag { background: rgba(244, 63, 94, 0.2); color: var(--accent-rose); }
+    .hall-3 .hall-tag { background: rgba(245, 158, 11, 0.2); color: var(--accent-gold); }
+    .hall-4 .hall-tag { background: rgba(168, 85, 247, 0.2); color: var(--accent-purple); }
+
+    .hall-desc {
+      font-size: 0.9rem;
+      color: var(--text-muted);
+      line-height: 1.5;
+      margin-bottom: 20px;
+      flex-grow: 1;
+    }
+
+    .hall-features {
+      list-style: none;
+      font-size: 0.8rem;
+      color: #cbd5e1;
+      margin-bottom: 20px;
+    }
+
+    .hall-features li {
+      margin-bottom: 6px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .hall-btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 8px;
+      width: 100%;
+      padding: 12px;
+      border-radius: 12px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.95rem;
+      transition: filter 0.2s;
+    }
+
+    .hall-1 .hall-btn { background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff; }
+    .hall-2 .hall-btn { background: linear-gradient(135deg, #e11d48, #be123c); color: #fff; }
+    .hall-3 .hall-btn { background: linear-gradient(135deg, #d97706, #b45309); color: #fff; }
+    .hall-4 .hall-btn { background: linear-gradient(135deg, #9333ea, #7e22ce); color: #fff; }
+
+    .hall-btn:hover { filter: brightness(1.1); }
+
+    /* 儀表板嵌入引導區 */
+    .dashboard-embed-section {
+      background: rgba(15, 23, 42, 0.8);
+      border: 1px solid rgba(245, 158, 11, 0.25);
+      border-radius: 24px;
+      padding: 28px;
+      margin-top: 20px;
+    }
+
+    .embed-header {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 20px;
+    }
+
+    .embed-title h2 {
+      font-size: 1.4rem;
+      font-weight: 800;
+      color: #fef08a;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .embed-title p {
+      font-size: 0.88rem;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+
+    .embed-actions {
+      display: flex;
+      gap: 10px;
+    }
+
+    .btn-action {
+      padding: 10px 18px;
+      border-radius: 10px;
+      text-decoration: none;
+      font-size: 0.88rem;
+      font-weight: 700;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      transition: all 0.2s;
+    }
+
+    .btn-gas {
+      background: rgba(245, 158, 11, 0.2);
+      border: 1px solid rgba(245, 158, 11, 0.4);
+      color: var(--accent-gold);
+    }
+
+    .btn-gas:hover {
+      background: rgba(245, 158, 11, 0.3);
+    }
+
+    .spec-banner {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 14px;
+      background: rgba(0, 0, 0, 0.3);
+      padding: 16px;
+      border-radius: 14px;
+      margin-top: 16px;
+      font-size: 0.85rem;
+    }
+
+    .spec-item {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+
+    .spec-item .label {
+      color: var(--text-muted);
+      font-size: 0.75rem;
+    }
+
+    .spec-item .val {
+      color: #fff;
+      font-weight: 700;
+    }
+  </style>
+<style>
+/* 🔒 教師安全防護 PIN 密碼鎖樣式 */
+.pin-modal-overlay {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  background: rgba(15, 23, 42, 0.96);
+  backdrop-filter: blur(16px);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 999999;
+}
+.pin-modal-overlay.hidden {
+  display: none !important;
+}
+.pin-modal-card {
+  background: #1e293b;
+  border: 2px solid #38bdf8;
+  border-radius: 24px;
+  padding: 36px 28px;
+  text-align: center;
+  max-width: 420px;
+  width: 90%;
+  box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+  animation: pinPopIn 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+@keyframes pinPopIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+.pin-icon {
+  font-size: 3.2rem;
+  margin-bottom: 12px;
+}
+.pin-modal-card h2 {
+  font-size: 1.5rem;
+  color: #f8fafc;
+  margin: 0 0 10px 0;
+  font-weight: 800;
+}
+.pin-modal-card p {
+  color: #94a3b8;
+  font-size: 0.95rem;
+  margin-bottom: 20px;
+  line-height: 1.5;
+}
+.pin-modal-card input {
+  width: 82%;
+  padding: 12px;
+  font-size: 1.6rem;
+  text-align: center;
+  letter-spacing: 6px;
+  background: #0f172a;
+  border: 2px solid #334155;
+  border-radius: 12px;
+  color: #38bdf8;
+  margin-bottom: 12px;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.pin-modal-card input:focus {
+  border-color: #38bdf8;
+  box-shadow: 0 0 12px rgba(56, 189, 248, 0.4);
+}
+.pin-error-text {
+  color: #f87171;
+  font-size: 0.9rem;
+  font-weight: 700;
+  min-height: 22px;
+  margin-bottom: 14px;
+}
+.btn-pin-submit {
+  width: 100%;
+  padding: 13px;
+  background: linear-gradient(135deg, #0284c7, #0369a1);
+  color: white;
+  border: none;
+  border-radius: 12px;
+  font-weight: 800;
+  font-size: 1.05rem;
+  cursor: pointer;
+  transition: opacity 0.2s, transform 0.1s;
+}
+.btn-pin-submit:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
+}
+.btn-pin-submit:active {
+  transform: translateY(0);
+}
+</style>
+</head>
+<body>
+
+  <div class="container">
+    <header>
+      <div class="badge-top">✨ 國中生物與班級經營整合平台</div>
+      <h1>雲端教學資源與大廳總控台</h1>
+      <p class="subtitle">
+        四大專屬大廳各司其職，全平台已統一採用 <b>701~710 班級</b> 與 <b>01~35 號標準座號選單</b>，支援大螢幕觸控、iPad 遊玩與即時點名看板。
+      </p>
+      <div style="text-align:right; padding:6px 16px;"><button id="btnTeacherPinLock" style="background:#1e293b; color:#f8fafc; border:1px solid #475569; padding:6px 14px; border-radius:6px; font-weight:700; cursor:pointer;" onclick="toggleTeacherPinLock()">🔒 總控台安全鎖</button></div>
+</header>
+
+    <!-- 四大專屬大廳卡片導覽 -->
+    <main class="halls-grid">
+      
+      <!-- 大廳一 -->
+      <article class="hall-card hall-1">
+        <div class="hall-icon-wrapper">🎮</div>
+        <div class="hall-title-row">
+          <h2 class="hall-title">大廳一：主題遊戲</h2>
+          <span class="hall-tag">共用中央題庫</span>
+        </div>
+        <p class="hall-desc">全體 11 款遊戲共享生物 1~15 單元題庫，換題庫全場同步更換，支援班級經營一鍵暫停與 Top 3 覆盤戰報。</p>
+        <ul class="hall-features">
+          <li>🦖 侏羅紀逃生、大富翁、瑪利歐等 11 款</li>
+          <li>📚 翰林/各版單元 1~15 與 50 題速測卷</li>
+          <li>📊 支援 701~710 與 01~35 成績雲端登錄</li>
+        </ul>
+        <a href="https://zeroseven-hue.github.io/bio-games/" target="_blank" rel="noopener" class="hall-btn">進入大廳一 (bio-games) →</a>
+      </article>
+
+      <!-- 大廳二 -->
+      <article class="hall-card hall-2">
+        <div class="hall-icon-wrapper">🕹️</div>
+        <div class="hall-title-row">
+          <h2 class="hall-title">大廳二：獨立遊戲</h2>
+          <span class="hall-tag">獨立專屬題庫</span>
+        </div>
+        <p class="hall-desc">針對特定重要單元深度打造的 3 款專題遊戲，自帶 36 題以上專屬題庫與專屬機制，不依賴中央題庫。</p>
+        <ul class="hall-features">
+          <li>🫀 人體消化大冒險 (54 格器官大地圖)</li>
+          <li>🧋 珍珠奶茶大對決 (毫秒級神經反應力)</li>
+          <li>🔬 五界研究所 (36 種生物檢索表圖鑑)</li>
+        </ul>
+        <a href="https://zeroseven-hue.github.io/bio-standalone-games/" target="_blank" rel="noopener" class="hall-btn">進入大廳二 (bio-standalone) →</a>
+      </article>
+
+      <!-- 大廳三 -->
+      <article class="hall-card hall-3">
+        <div class="hall-icon-wrapper">⏱️</div>
+        <div class="hall-title-row">
+          <h2 class="hall-title">大廳三：教學工具</h2>
+          <span class="hall-tag">課堂實務專用</span>
+        </div>
+        <p class="hall-desc">教室大螢幕專屬工具箱，包含多主題計時器、哥吉拉拔河、分組抽籤與搶答計分板，無題目干擾純工具服務。</p>
+        <ul class="hall-features">
+          <li>🌙 多主題專注計時器、哥吉拉守護者</li>
+          <li>🎲 正副組長分組器、大富翁動態抽籤</li>
+          <li>🏆 課堂小組記分板、搶答音效器</li>
+        </ul>
+        <a href="https://zeroseven-hue.github.io/bio-tools/" target="_blank" rel="noopener" class="hall-btn">進入大廳三 (bio-tools) →</a>
+      </article>
+
+      <!-- 大廳四 -->
+      <article class="hall-card hall-4">
+        <div class="hall-icon-wrapper">📋</div>
+        <div class="hall-title-row">
+          <h2 class="hall-title">大廳四：導師神器</h2>
+          <span class="hall-tag">班級經營專屬</span>
+        </div>
+        <p class="hall-desc">國中導師必備工具，涵蓋新生始業式闖關、開學表單與教科書點名、智慧排座位表、幹部開票與得獎表揚動畫。</p>
+        <ul class="hall-features">
+          <li>🎒 新生始業式與教科書/表單檢查</li>
+          <li>🪑 智慧座位表、幹部選舉開票機</li>
+          <li>🏅 課堂得獎表揚動畫、家長通知信</li>
+        </ul>
+        <a href="https://zeroseven-hue.github.io/bio-classroom/" target="_blank" rel="noopener" class="hall-btn">進入大廳四 (bio-classroom) →</a>
+      </article>
+
+    
+      <!-- 段考解析與訂正系統 -->
+      <article class="hall-card" style="border: 1px solid rgba(56, 189, 248, 0.4);">
+        <div class="hall-icon-wrapper" style="background: rgba(14, 165, 233, 0.15); color: #38bdf8;">📝</div>
+        <div class="hall-title-row">
+          <h2 class="hall-title">段考解析與即時訂正系統</h2>
+          <span class="hall-tag" style="background: rgba(56, 189, 248, 0.2); color: #38bdf8;">段考雙模式</span>
+        </div>
+        <p class="hall-desc">學生端錯題即時訂正診斷（10秒防快滑冷卻）與教師端全班 01~35 即時點名收卷矩陣、繳交率與物理試卷眼動核驗。</p>
+        <ul class="hall-features">
+          <li>📱 學生端訂正：錯題自動導流、抄寫核心觀念</li>
+          <li>📊 教師儀表板：即時座號矩陣、眼動核驗標記</li>
+          <li>☁️ Google 試算表就地更新最高分與訂正歷程</li>
+        </ul>
+        <div style="display:flex; gap:10px; flex-direction:column;">
+          <a href="https://zeroseven-hue.github.io/bio-exam-review/dashboard.html" target="_blank" rel="noopener" class="hall-btn" style="background: linear-gradient(135deg, #0284c7, #0369a1); color: #fff;">📊 開啟段考即時儀表板 →</a>
+          <a href="https://zeroseven-hue.github.io/bio-exam-review/?mode=student" target="_blank" rel="noopener" class="hall-btn" style="background: rgba(255,255,255,0.08); color: #38bdf8; border: 1px solid rgba(56, 189, 248, 0.3);">📱 學生段考訂正入口 →</a>
+        </div>
+      </article>
+  
+    </main>
+
+    <!-- 下方學習進度即時儀表板入口與標準規格告示 -->
+    <section class="dashboard-embed-section">
+      <div class="embed-header">
+        <div class="embed-title">
+          <h2>🏆 課堂學習進度即時儀表板 (GAS & Firebase)</h2>
+          <p>支援應到人數 24~35 人彈性自訂、今日請假標記扣除、學生就地更新最高分、一鍵複製未交名單與 CSV 匯出。</p>
+        </div>
+        <div class="embed-actions">
+          <a href="gas-dashboard/index.html" class="btn-action btn-gas">📊 開啟本機即時儀表板看板</a>
+        </div>
+      </div>
+
+      <div class="spec-banner">
+        <div class="spec-item">
+          <span class="label">標準班級代號</span>
+          <span class="val">701 ～ 710（固定三位數下拉）</span>
+        </div>
+        <div class="spec-item">
+          <span class="label">標準學生座號</span>
+          <span class="val">01 ～ 35（首位固定補零，自然對齊）</span>
+        </div>
+        <div class="spec-item">
+          <span class="label">課堂防呆模式</span>
+          <span class="val">個人 / 小組提交，免輸入純下拉防呆</span>
+        </div>
+        <div class="spec-item">
+          <span class="label">試算表自動排序</span>
+          <span class="val">按座號 01~35 順號就地更新最高分</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+
+<script>
+function toggleTeacherPinLock() {
+    const cur = localStorage.getItem('teacher_global_pin') || '8088';
+    const pwd = prompt('🔒 請輸入總控台解鎖密碼：');
+    if (pwd === cur) {
+        alert('✅ 密碼正確，已解鎖總控管理功能！');
+    } else if (pwd !== null) {
+        alert('❌ 密碼錯誤！');
+    }
+}
+</script>
+
+  <!-- 🔒 教師安全防護 PIN 密碼解鎖 Modal -->
+  <div id="pinLockModal" class="pin-modal-overlay">
+    <div class="pin-modal-card">
+      <div class="pin-icon">🔒</div>
+      <h2>大廳五：雲端總控儀表板 安全鎖</h2>
+      <p>本平台為教師雲端總控與全班即時儀表板，請輸入管理密碼解鎖進入：</p>
+      <input type="password" id="pinInput" placeholder="請輸入密碼" maxlength="10" autocomplete="off">
+      <div id="pinErrorMsg" class="pin-error-text"></div>
+      <button id="btnSubmitPin" class="btn-pin-submit">🔓 解鎖進入大廳</button>
+    </div>
+  </div>
+
+<script>
+// ==================== 🔒 教師安全驗證門禁系統 (預設8088，無洩漏) ====================
+(function initGlobalHallGatekeeper() {
+  const SESSION_AUTH_KEY = 'bio_teacher_auth_passed';
+  const PIN_KEY = 'teacher_global_pin';
+  const DEFAULT_PIN = '8088';
+
+  function isAuthed() {
+    return sessionStorage.getItem(SESSION_AUTH_KEY) === 'true';
+  }
+
+  function setAuthed() {
+    sessionStorage.setItem(SESSION_AUTH_KEY, 'true');
+  }
+
+  window.addEventListener('DOMContentLoaded', () => {
+    const modal = document.getElementById('pinLockModal');
+    const pinInput = document.getElementById('pinInput');
+    const btnSubmit = document.getElementById('btnSubmitPin');
+    const errMsg = document.getElementById('pinErrorMsg');
+
+    if (!modal) return;
+
+    if (isAuthed()) {
+      modal.classList.add('hidden');
+      document.body.style.overflow = 'auto';
+      return;
+    }
+
+    // 未驗證，鎖定畫面
+    modal.classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    if (pinInput) setTimeout(() => pinInput.focus(), 200);
+
+    function verifyPin() {
+      const entered = (pinInput ? pinInput.value.trim() : '');
+      const validPin = localStorage.getItem(PIN_KEY) || DEFAULT_PIN;
+      if (entered === validPin) {
+        setAuthed();
+        modal.classList.add('hidden');
+        document.body.style.overflow = 'auto';
+        if (pinInput) pinInput.value = '';
+        if (errMsg) errMsg.textContent = '';
+      } else {
+        if (errMsg) errMsg.textContent = '❌ 密碼不正確，請重新輸入！';
+        if (pinInput) {
+          pinInput.value = '';
+          pinInput.focus();
+        }
+      }
+    }
+
+    if (btnSubmit) {
+      btnSubmit.addEventListener('click', verifyPin);
+    }
+    if (pinInput) {
+      pinInput.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') verifyPin();
+      });
+    }
+  });
+})();
+</script>
+</body>
+</html>

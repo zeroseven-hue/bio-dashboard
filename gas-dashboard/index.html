@@ -1,0 +1,650 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>🏆 課堂學習進度儀表板</title>
+  <style>
+    :root {
+      --bg-main: radial-gradient(circle at top, #1e293b 0%, #0f172a 100%);
+      --card-bg: rgba(30, 41, 59, 0.9);
+      --border-color: rgba(56, 189, 248, 0.25);
+      --primary-blue: #38bdf8;
+      --accent-gold: #f59e0b;
+      --accent-green: #22c55e;
+      --accent-purple: #a855f7;
+      --accent-red: #ef4444;
+      --text-light: #f8fafc;
+      --text-muted: #94a3b8;
+      --card-inner-bg: rgba(15, 23, 42, 0.7);
+      --seat-submitted-bg: rgba(34, 197, 94, 0.15);
+      --seat-submitted-border: #22c55e;
+      --seat-submitted-text: #ffffff;
+      --seat-pending-bg: rgba(255, 255, 255, 0.04);
+      --seat-pending-border: rgba(255, 255, 255, 0.12);
+      --seat-absent-bg: rgba(245, 158, 11, 0.15);
+      --seat-absent-border: #f59e0b;
+      --seat-absent-text: #fbbf24;
+      --select-bg: #0f172a;
+      --shadow-style: 0 10px 30px rgba(0, 0, 0, 0.3);
+    }
+
+    body.theme-light {
+      --bg-main: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+      --card-bg: #ffffff;
+      --border-color: #cbd5e1;
+      --primary-blue: #0284c7;
+      --accent-gold: #d97706;
+      --accent-green: #16a34a;
+      --accent-purple: #9333ea;
+      --accent-red: #dc2626;
+      --text-light: #0f172a;
+      --text-muted: #475569;
+      --card-inner-bg: #f8fafc;
+      --seat-submitted-bg: #dcfce7;
+      --seat-submitted-border: #16a34a;
+      --seat-submitted-text: #14532d;
+      --seat-pending-bg: #f1f5f9;
+      --seat-pending-border: #cbd5e1;
+      --seat-absent-bg: #fef3c7;
+      --seat-absent-border: #d97706;
+      --seat-absent-text: #92400e;
+      --select-bg: #ffffff;
+      --shadow-style: 0 8px 25px rgba(0, 0, 0, 0.08);
+    }
+
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background: var(--bg-main);
+      color: var(--text-light);
+      min-height: 100vh;
+      padding: 20px;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    .container { max-width: 1240px; margin: 0 auto; }
+
+    .header {
+      display: flex; justify-content: space-between; align-items: center;
+      flex-wrap: wrap; gap: 16px; background: var(--card-bg);
+      border: 1px solid var(--border-color); border-radius: 20px;
+      padding: 20px 24px; margin-bottom: 24px; box-shadow: var(--shadow-style);
+    }
+
+    .header-title h1 { font-size: 1.6rem; color: var(--primary-blue); display: flex; align-items: center; gap: 10px; }
+    .header-title p { font-size: 0.9rem; color: var(--text-muted); margin-top: 4px; }
+    .header-controls { display: flex; align-items: center; flex-wrap: wrap; gap: 10px; }
+
+    .styled-select, .styled-input {
+      background: var(--select-bg); color: var(--primary-blue);
+      border: 2px solid var(--primary-blue); padding: 7px 14px;
+      border-radius: 12px; font-size: 1rem; font-weight: 800; outline: none;
+    }
+    .styled-input { width: 70px; text-align: center; }
+
+    .btn-action {
+      background: linear-gradient(135deg, #0284c7, #0369a1); color: white; border: none;
+      padding: 9px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-action:hover { transform: translateY(-2px); }
+
+    .btn-success {
+      background: linear-gradient(135deg, #16a34a, #15803d); color: white; border: none;
+      padding: 9px 16px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s ease;
+    }
+    .btn-success:hover { transform: translateY(-2px); }
+
+    .btn-theme-toggle {
+      background: rgba(255, 255, 255, 0.15); border: 1.5px solid var(--border-color);
+      color: var(--text-light); padding: 8px 14px; border-radius: 12px; font-weight: 800; cursor: pointer; transition: all 0.2s ease;
+    }
+
+    .btn-toggle-score {
+      background: rgba(255, 255, 255, 0.1); border: 1px solid var(--border-color);
+      color: var(--text-muted); padding: 8px 14px; border-radius: 12px; font-size: 0.85rem; font-weight: 700; cursor: pointer;
+    }
+
+    .progress-card {
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px;
+      padding: 22px 24px; margin-bottom: 24px; box-shadow: var(--shadow-style);
+    }
+
+    .progress-header { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 12px; }
+    .progress-title { font-size: 1.15rem; font-weight: 800; }
+    .progress-stats { font-size: 1.15rem; font-weight: 900; }
+
+    .progress-bar-bg {
+      width: 100%; height: 18px; background: var(--card-inner-bg);
+      border-radius: 10px; overflow: hidden; border: 1px solid var(--border-color); margin-bottom: 14px;
+    }
+    .progress-bar-fill { height: 100%; width: 0%; background: linear-gradient(90deg, #38bdf8, #22c55e); transition: width 0.5s ease; }
+
+    .action-bar-row {
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+      background: var(--card-inner-bg); border: 1px solid var(--border-color);
+      border-radius: 14px; padding: 12px 16px; font-size: 0.9rem; font-weight: 700;
+    }
+    .absent-group { display: flex; align-items: center; gap: 8px; flex: 1; min-width: 290px; }
+    .absent-group input {
+      flex: 1; background: var(--select-bg); border: 1px solid var(--border-color);
+      color: var(--text-light); padding: 7px 12px; border-radius: 8px; font-size: 0.9rem; outline: none;
+    }
+
+    .tools-group { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+    .main-grid { display: grid; grid-template-columns: 1fr 1.3fr; gap: 24px; }
+    @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+
+    .panel-box { background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px; padding: 22px; box-shadow: var(--shadow-style); }
+    .panel-box h2 { font-size: 1.2rem; margin-bottom: 16px; color: var(--primary-blue); display: flex; align-items: center; justify-content: space-between; }
+
+    .top5-list { display: flex; flex-direction: column; gap: 12px; }
+    .top5-item { display: flex; align-items: center; justify-content: space-between; background: var(--card-inner-bg); border: 1px solid var(--border-color); border-radius: 16px; padding: 14px 18px; }
+    .top5-badge { width: 36px; height: 36px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 1.1rem; }
+    .rank-1 { background: linear-gradient(135deg, #f59e0b, #d97706); color: #fff; }
+    .rank-2 { background: linear-gradient(135deg, #94a3b8, #64748b); color: #fff; }
+    .rank-3 { background: linear-gradient(135deg, #b45309, #78350f); color: #fff; }
+    .rank-other { background: rgba(56, 189, 248, 0.2); color: var(--primary-blue); }
+
+    .top5-info { flex: 1; margin: 0 16px; }
+    .top5-info .name { font-weight: 800; font-size: 1.05rem; }
+    .top5-info .meta { font-size: 0.8rem; color: var(--text-muted); }
+    .top5-score { font-size: 1.25rem; font-weight: 900; color: var(--accent-green); }
+
+    .seat-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(115px, 1fr)); gap: 10px; }
+    .seat-card {
+      border-radius: 14px; padding: 10px 8px; text-align: center; transition: all 0.2s ease;
+      cursor: pointer; user-select: none; position: relative;
+    }
+    .seat-card:hover { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(0,0,0,0.15); }
+    .seat-card.submitted { background: var(--seat-submitted-bg); border: 1.5px solid var(--seat-submitted-border); color: var(--seat-submitted-text); }
+    .seat-card.pending { background: var(--seat-pending-bg); border: 1.5px dashed var(--seat-pending-border); color: var(--text-muted); }
+    .seat-card.absent { background: var(--seat-absent-bg); border: 1.5px solid var(--seat-absent-border); color: var(--seat-absent-text); }
+    .seat-card.conflict { border-color: var(--accent-red) !important; }
+
+    /* 左上角獨立請假圖示標籤 */
+    .absent-toggle-badge {
+      position: absolute; top: 4px; left: 4px;
+      width: 22px; height: 22px; border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 0.75rem; cursor: pointer; transition: all 0.15s ease;
+      background: rgba(255, 255, 255, 0.08); color: var(--text-muted);
+    }
+    .absent-toggle-badge:hover { background: #ef4444; color: #fff; transform: scale(1.15); }
+    .seat-card.absent .absent-toggle-badge { background: #ef4444; color: #fff; }
+
+    /* 右上角重複組員警示標籤 */
+    .conflict-badge {
+      position: absolute; top: 4px; right: 4px;
+      font-size: 0.72rem; cursor: help;
+    }
+
+    .seat-num { font-size: 1.05rem; font-weight: 900; margin-top: 4px; }
+    .seat-card.submitted .seat-num { color: var(--accent-green); }
+    .seat-card.pending .seat-num { color: var(--primary-blue); }
+    .seat-card.absent .seat-num { color: var(--accent-gold); }
+
+    .seat-status-text { font-size: 0.8rem; font-weight: 700; margin-top: 4px; }
+    .seat-subinfo { font-size: 0.72rem; color: var(--text-muted); margin-top: 2px; }
+    .private-score { font-size: 0.75rem; color: var(--accent-gold); margin-top: 2px; display: none; }
+    .show-scores .private-score { display: block; }
+
+    /* Modal 彈出視窗樣式 */
+    .modal-overlay {
+      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0, 0, 0, 0.65); display: flex; align-items: center; justify-content: center;
+      z-index: 1000; opacity: 0; pointer-events: none; transition: opacity 0.2s ease;
+    }
+    .modal-overlay.active { opacity: 1; pointer-events: auto; }
+    .modal-box {
+      background: var(--card-bg); border: 1px solid var(--border-color); border-radius: 20px;
+      padding: 24px; width: 90%; max-width: 420px; box-shadow: var(--shadow-style);
+    }
+    .modal-box h3 { color: var(--primary-blue); margin-bottom: 16px; font-size: 1.25rem; }
+    .form-group { margin-bottom: 12px; }
+    .form-group label { display: block; font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; font-weight: 700; }
+    .form-group input {
+      width: 100%; background: var(--select-bg); border: 1px solid var(--border-color);
+      color: var(--text-light); padding: 9px 12px; border-radius: 10px; font-size: 0.95rem; outline: none;
+    }
+    .modal-buttons { display: flex; gap: 10px; margin-top: 18px; }
+    .modal-buttons button { flex: 1; padding: 10px; border-radius: 10px; font-weight: 800; cursor: pointer; border: none; }
+    .btn-cancel { background: rgba(255, 255, 255, 0.1); color: var(--text-muted); }
+  </style>
+</head>
+<body class="theme-dark">
+  <div class="container">
+    <header class="header">
+      <div class="header-title">
+        <h1>🏆 課堂學習進度儀表板</h1>
+        <p>自訂各班人數 ‧ 請假標記 ‧ 學習點名儀表板</p>
+      </div>
+      <div class="header-controls">
+        <select class="styled-select" id="classFilter" onchange="onClassChange()">
+          <option value="701">701 班</option><option value="702">702 班</option>
+          <option value="703">703 班</option><option value="704">704 班</option>
+          <option value="705">705 班</option><option value="706">706 班</option>
+          <option value="707">707 班</option><option value="708">708 班</option>
+          <option value="709">709 班</option><option value="710" selected>710 班</option>
+          <option value="七甲">七甲</option>
+          <option value="七乙">七乙</option>
+          <option value="七丙">七丙</option>
+        </select>
+
+        <div style="display:flex; align-items:center; gap:6px; font-weight:800; font-size:0.9rem;">
+          <span>應到人數：</span>
+          <input type="number" class="styled-input" id="totalSeatsInput" value="30" min="1" max="50" onchange="saveClassConfig(); renderDashboard();" />
+          <span>人</span>
+        </div>
+
+        <button class="btn-theme-toggle" id="btnThemeToggle" onclick="toggleTheme()">☀️ 明亮色彩模式</button>
+        <button class="btn-toggle-score" id="btnToggleScore" onclick="toggleScoreVisibility()">👁️ 導師分數切換</button>
+        <button class="btn-action" onclick="loadData()">🔄 刷新資料</button>
+      </div>
+    </header>
+
+    <div class="progress-card">
+      <div class="progress-header">
+        <div class="progress-title" id="progressClassTitle">701 班 課堂挑戰參與率</div>
+        <div class="progress-stats">
+          已完成：<span style="color:var(--accent-green)" id="submittedCount">0</span> / 
+          實到應交：<span style="color:var(--primary-blue)" id="actualRequiredCount">30</span> 人 
+          (<span style="color:var(--accent-gold)" id="progressPercent">0%</span>)
+        </div>
+      </div>
+      <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressBarFill"></div></div>
+
+      <div class="action-bar-row">
+        <div class="absent-group">
+          <span>🏖️ 本班今日請假座號：</span>
+          <input type="text" id="absentSeatsInput" placeholder="請輸入請假座號 (例如：05, 12)，或直接點擊下方座號卡" onchange="saveClassConfig(); renderDashboard();" />
+          <span style="font-size:0.8rem; color:var(--text-muted);">(將自動扣除應交人數)</span>
+        </div>
+        <div class="tools-group">
+          <button class="btn-success" onclick="openManualModal()">✍️ 手動補登成績</button>
+          <button class="btn-action" onclick="copyPendingSeats()" style="background:linear-gradient(135deg, #a855f7, #7e22ce);">📋 複製未交名單</button>
+          <button class="btn-action" onclick="exportCSV()" style="background:linear-gradient(135deg, #059669, #047857);">📥 匯出CSV</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="main-grid">
+      <div class="panel-box">
+        <h2>🎉 學習榮譽英雄榜 (Top 5)</h2>
+        <div class="top5-list" id="top5List"><div style="text-align:center; color:var(--text-muted); padding:30px;">載入榮譽榜中...</div></div>
+      </div>
+
+      <div class="panel-box" id="matrixPanel">
+        <h2>
+          <span>🔢 全班完成狀態圖 (左上角切換請假 / 點卡片補登)</span>
+          <span style="font-size:0.8rem; font-weight:normal; color:var(--text-muted);">點擊卡片可手動補登</span>
+        </h2>
+        <div class="seat-grid" id="seatMatrixGrid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 手動補登成績視窗 -->
+  <div class="modal-overlay" id="manualModal">
+    <div class="modal-box">
+      <h3>✍️ 老師手動補登成績</h3>
+      <div class="form-group">
+        <label>座號 (例如：01、15)</label>
+        <input type="text" id="manualSeat" placeholder="請輸入座號" />
+      </div>
+      <div class="form-group">
+        <label>學生姓名</label>
+        <input type="text" id="manualName" placeholder="請輸入學生姓名" />
+      </div>
+      <div class="form-group">
+        <label>得分</label>
+        <input type="number" id="manualScore" value="100" min="0" max="100" />
+      </div>
+      <div class="form-group">
+        <label>遊戲/任務名稱</label>
+        <input type="text" id="manualGameTitle" value="課堂挑戰 (老師補登)" />
+      </div>
+      <div class="form-group">
+        <label>補登備註</label>
+        <input type="text" id="manualNote" value="手動補登" placeholder="例如：平板故障補登、請假補測" />
+      </div>
+      <div class="modal-buttons">
+        <button class="btn-cancel" onclick="closeManualModal()">取消</button>
+        <button class="btn-success" onclick="submitManualScore()">確認送出補登</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let rawRecords = [];
+    let isScoreVisible = false;
+    let currentTheme = localStorage.getItem('gas_dashboard_theme') || 'dark';
+
+    function initTheme() {
+      if (currentTheme === 'light') {
+        document.body.classList.remove('theme-dark');
+        document.body.classList.add('theme-light');
+        document.getElementById('btnThemeToggle').textContent = '🌙 深色夜間模式';
+      } else {
+        document.body.classList.remove('theme-light');
+        document.body.classList.add('theme-dark');
+        document.getElementById('btnThemeToggle').textContent = '☀️ 明亮色彩模式';
+      }
+    }
+
+    function toggleTheme() {
+      currentTheme = (currentTheme === 'dark') ? 'light' : 'dark';
+      localStorage.setItem('gas_dashboard_theme', currentTheme);
+      initTheme();
+    }
+
+    function onClassChange() {
+      loadClassConfig();
+      renderDashboard();
+    }
+
+    function loadClassConfig() {
+      const cls = document.getElementById('classFilter').value;
+      const savedTotal = localStorage.getItem(`gas_cfg_${cls}_total`) || '30';
+      const savedAbsent = localStorage.getItem(`gas_cfg_${cls}_absent`) || '';
+      document.getElementById('totalSeatsInput').value = savedTotal;
+      document.getElementById('absentSeatsInput').value = savedAbsent;
+    }
+
+    function saveClassConfig() {
+      const cls = document.getElementById('classFilter').value;
+      const total = document.getElementById('totalSeatsInput').value;
+      const absent = document.getElementById('absentSeatsInput').value;
+      localStorage.setItem(`gas_cfg_${cls}_total`, total);
+      localStorage.setItem(`gas_cfg_${cls}_absent`, absent);
+    }
+
+    function toggleAbsentSeat(seatNumStr, event) {
+      if (event) event.stopPropagation();
+      const absentInput = document.getElementById('absentSeatsInput');
+      let currentList = absentInput.value.split(/[,，\s]+/).filter(Boolean).map(s => String(s).padStart(2, '0'));
+
+      if (currentList.includes(seatNumStr)) {
+        currentList = currentList.filter(s => s !== seatNumStr);
+      } else {
+        currentList.push(seatNumStr);
+      }
+
+      absentInput.value = currentList.sort().join(', ');
+      saveClassConfig();
+      renderDashboard();
+    }
+
+    function handleCardClickForScore(seatNumStr) {
+      document.getElementById('manualSeat').value = seatNumStr;
+      document.getElementById('manualName').value = `${seatNumStr}號同學`;
+      document.getElementById('manualScore').value = 100;
+      document.getElementById('manualGameTitle').value = '課堂挑戰 (老師補登)';
+      document.getElementById('manualNote').value = '手動補登';
+      openManualModal();
+    }
+
+    function openManualModal() {
+      document.getElementById('manualModal').classList.add('active');
+    }
+
+    function closeManualModal() {
+      document.getElementById('manualModal').classList.remove('active');
+    }
+
+    function submitManualScore() {
+      const cls = document.getElementById('classFilter').value;
+      const seat = document.getElementById('manualSeat').value.trim();
+      const name = document.getElementById('manualName').value.trim();
+      const score = Number(document.getElementById('manualScore').value) || 0;
+      const gameTitle = document.getElementById('manualGameTitle').value.trim() || '老師手動補登';
+      const note = document.getElementById('manualNote').value.trim() || '手動補登';
+
+      if (!seat) {
+        alert('請輸入座號！');
+        return;
+      }
+
+      const payload = {
+        class: cls,
+        gameTitle: gameTitle,
+        mode: 'individual',
+        seatOrGroup: seat.includes('號') ? seat : seat + '號',
+        nameOrMembers: name || (seat + '號同學'),
+        score: score,
+        duration: `✍️ ${note}`
+      };
+
+      google.script.run
+        .withSuccessHandler(res => {
+          if (res.status === 'success') {
+            closeManualModal();
+            loadData();
+          } else {
+            alert('補登失敗：' + res.message);
+          }
+        })
+        .withFailureHandler(err => alert('系統錯誤：' + err))
+        .saveManualScoreBackend(payload);
+    }
+
+    function loadData() {
+      google.script.run
+        .withSuccessHandler(data => {
+          rawRecords = data.records || [];
+          renderDashboard();
+        })
+        .withFailureHandler(err => console.error(err))
+        .getScoresData();
+    }
+
+    function toggleScoreVisibility() {
+      isScoreVisible = !isScoreVisible;
+      const btn = document.getElementById('btnToggleScore');
+      const panel = document.getElementById('matrixPanel');
+
+      if (isScoreVisible) {
+        btn.textContent = '🔒 隱藏個人分數 (公開模式)';
+        btn.style.background = 'rgba(239, 68, 68, 0.2)';
+        panel.classList.add('show-scores');
+      } else {
+        btn.textContent = '👁️ 導師分數切換 (私下查看)';
+        btn.style.background = 'rgba(255, 255, 255, 0.1)';
+        panel.classList.remove('show-scores');
+      }
+    }
+
+    function copyPendingSeats() {
+      const totalSeats = parseInt(document.getElementById('totalSeatsInput').value) || 30;
+      const selectedClass = document.getElementById('classFilter').value;
+      const absentInputVal = document.getElementById('absentSeatsInput').value;
+      const absentSet = new Set(absentInputVal.split(/[,，\s]+/).filter(Boolean).map(s => String(s).padStart(2, '0')));
+
+      const classRecords = rawRecords.filter(r => String(r.className || "").replace(/[^0-9]/g, "") === String(selectedClass).replace(/[^0-9]/g, ""));
+      const submittedSet = new Set();
+
+      classRecords.forEach(r => {
+        const isGroup = String(r.mode).includes('組') || String(r.seatOrGroup).includes('組');
+        if (isGroup && r.nameOrMembers) {
+          const matchedSeats = String(r.nameOrMembers).match(/\d+/g) || [];
+          matchedSeats.forEach(s => submittedSet.add(String(s).padStart(2, '0')));
+        } else if (r.seatOrGroup) {
+          const matchedSeats = String(r.seatOrGroup).match(/\d+/g) || [];
+          matchedSeats.forEach(s => submittedSet.add(String(s).padStart(2, '0')));
+        }
+      });
+
+      let pendingList = [];
+      for (let i = 1; i <= totalSeats; i++) {
+        const seatStr = String(i).padStart(2, '0');
+        if (!absentSet.has(seatStr) && !submittedSet.has(seatStr)) {
+          pendingList.push(seatStr + '號');
+        }
+      }
+
+      if (pendingList.length === 0) {
+        alert('太棒了！本班應到同學皆已全部完成！🎉');
+        return;
+      }
+
+      const text = `${selectedClass}班尚未完成挑戰的同學：${pendingList.join(', ')}，請把握時間完成喔！`;
+      navigator.clipboard.writeText(text).then(() => {
+        alert('已成功複製未交名單到剪貼簿！可直接貼至 LINE 群組：\n\n' + text);
+      });
+    }
+
+    function exportCSV() {
+      const selectedClass = document.getElementById('classFilter').value;
+      const classRecords = rawRecords.filter(r => String(r.className || "").replace(/[^0-9]/g, "") === String(selectedClass).replace(/[^0-9]/g, ""));
+      
+      if (classRecords.length === 0) {
+        alert('目前尚無本班成績紀錄可供匯出。');
+        return;
+      }
+
+      let csv = '\uFEFF提交時間,班級,遊戲名稱,模式,座號/組別,姓名/組員,得分,耗時與備註\n';
+      classRecords.forEach(r => {
+        csv += `"${r.timestamp}","${r.className}","${r.gameTitle}","${r.mode}","${r.seatOrGroup}","${r.nameOrMembers}","${r.score}","${r.duration}"\n`;
+      });
+
+      const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedClass}班_課堂學習成績匯出.csv`;
+      a.click();
+    }
+
+    function renderDashboard() {
+      const selectedClass = document.getElementById('classFilter').value;
+      document.getElementById('progressClassTitle').textContent = `${selectedClass} 班 課堂挑戰參與率`;
+
+      const classRecords = rawRecords.filter(r => String(r.className || "").replace(/[^0-9]/g, "") === String(selectedClass).replace(/[^0-9]/g, ""));
+      const sortedRecords = [...classRecords].sort((a, b) => b.score - a.score);
+      const top5 = sortedRecords.slice(0, 5);
+      const top5List = document.getElementById('top5List');
+
+      if (top5.length === 0) {
+        top5List.innerHTML = '<div style="text-align:center; color:var(--text-muted); padding:30px;">尚無紀錄</div>';
+      } else {
+        const medalEmojis = ['🥇', '🥈', '🥉', '✨', '🌟'];
+        top5List.innerHTML = top5.map((r, idx) => {
+          let badgeClass = 'rank-other';
+          if (idx === 0) badgeClass = 'rank-1';
+          else if (idx === 1) badgeClass = 'rank-2';
+          else if (idx === 2) badgeClass = 'rank-3';
+
+          const titleDisplay = r.gameTitle || '課堂遊戲';
+          return `
+            <div class="top5-item">
+              <div class="top5-badge ${badgeClass}">${medalEmojis[idx]}</div>
+              <div class="top5-info">
+                <div class="name">${r.nameOrMembers} <span style="font-size:0.8rem; color:var(--primary-blue); margin-left:4px;">${r.seatOrGroup}</span></div>
+                <div class="meta">${titleDisplay}</div>
+              </div>
+              <div class="top5-score">${r.score} 分</div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const absentInputVal = document.getElementById('absentSeatsInput').value;
+      const absentSet = new Set(absentInputVal.split(/[,，\s]+/).filter(Boolean).map(s => String(s).padStart(2, '0')));
+
+      // 座號紀錄結構：支援個人與小組多座號映射
+      const seatSubmissions = {};
+
+      classRecords.forEach(r => {
+        const isGroup = String(r.mode).includes('組') || String(r.seatOrGroup).includes('組');
+        let matchedSeats = [];
+
+        if (isGroup && r.nameOrMembers) {
+          // 小組模式：從組員欄位提取多座號（相容頓號、逗號、空格）
+          matchedSeats = String(r.nameOrMembers).match(/\d+/g) || [];
+        } else if (r.seatOrGroup) {
+          // 個人模式：直接提取個人座號
+          matchedSeats = String(r.seatOrGroup).match(/\d+/g) || [];
+        }
+
+        matchedSeats.forEach(s => {
+          const seatNum = String(s).padStart(2, '0');
+          if (!seatSubmissions[seatNum]) {
+            seatSubmissions[seatNum] = [];
+          }
+          seatSubmissions[seatNum].push({
+            groupName: r.seatOrGroup,
+            score: r.score,
+            isGroup: isGroup,
+            raw: r
+          });
+        });
+      });
+
+      const totalSeats = parseInt(document.getElementById('totalSeatsInput').value) || 30;
+      let submittedCount = 0;
+      let absentCount = 0;
+      const gridContainer = document.getElementById('seatMatrixGrid');
+      gridContainer.innerHTML = '';
+
+      for (let i = 1; i <= totalSeats; i++) {
+        const seatStr = String(i).padStart(2, '0');
+        const isAbsent = absentSet.has(seatStr);
+        const subList = seatSubmissions[seatStr] || [];
+        const isSubmitted = subList.length > 0;
+        const isConflict = subList.length > 1;
+
+        if (isAbsent) {
+          absentCount++;
+          gridContainer.innerHTML += `
+            <div class="seat-card absent" onclick="handleCardClickForScore('${seatStr}')" title="點擊卡片可手動補登成績">
+              <div class="absent-toggle-badge" onclick="toggleAbsentSeat('${seatStr}', event)" title="點此取消請假">🏖️</div>
+              <div class="seat-num">${seatStr} 號</div>
+              <div class="seat-status-text">請假中 🏖️</div>
+              <div class="private-score">--</div>
+            </div>
+          `;
+        } else if (isSubmitted) {
+          submittedCount++;
+          const primarySub = subList[0];
+          const conflictNote = isConflict ? `⚠️ 重複組員: ${subList.map(s => s.groupName).join(' & ')}` : '';
+          const groupTag = primarySub.isGroup ? primarySub.groupName : '已完成';
+
+          gridContainer.innerHTML += `
+            <div class="seat-card submitted ${isConflict ? 'conflict' : ''}" onclick="handleCardClickForScore('${seatStr}')" title="${isConflict ? conflictNote : '已完成 (點擊可修改補登)'}">
+              <div class="absent-toggle-badge" onclick="toggleAbsentSeat('${seatStr}', event)" title="點此標記為請假">🏖️</div>
+              ${isConflict ? `<div class="conflict-badge" title="${conflictNote}">⚠️</div>` : ''}
+              <div class="seat-num">${seatStr} 號</div>
+              <div class="seat-status-text">✅ ${groupTag}</div>
+              <div class="seat-subinfo">${isConflict ? '⚠️名單重疊' : ''}</div>
+              <div class="private-score">${primarySub.score} 分</div>
+            </div>
+          `;
+        } else {
+          gridContainer.innerHTML += `
+            <div class="seat-card pending" onclick="handleCardClickForScore('${seatStr}')" title="未繳交 (點擊卡片可手動補登成績)">
+              <div class="absent-toggle-badge" onclick="toggleAbsentSeat('${seatStr}', event)" title="點此標記為請假">🏖️</div>
+              <div class="seat-num">${seatStr} 號</div>
+              <div class="seat-status-text">加油中 💪</div>
+              <div class="private-score">--</div>
+            </div>
+          `;
+        }
+      }
+
+      const actualRequired = Math.max(1, totalSeats - absentCount);
+      const percent = Math.min(100, Math.round((submittedCount / actualRequired) * 100));
+
+      document.getElementById('submittedCount').textContent = submittedCount;
+      document.getElementById('actualRequiredCount').textContent = actualRequired;
+      document.getElementById('progressPercent').textContent = (percent >= 100 && submittedCount >= actualRequired) ? '100% 🎉 應交全數完成！' : `${percent}%`;
+      document.getElementById('progressBarFill').style.width = `${percent}%`;
+    }
+
+    initTheme();
+    loadClassConfig();
+    loadData();
+    setInterval(loadData, 8000);
+  </script>
+</body>
+</html>
