@@ -9,70 +9,74 @@
   <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@400;500;700;800;900&family=Outfit:wght@600;700;800;900&display=swap" rel="stylesheet">
   <style>
     /* =========================================================
-       CSS 變數系統：支援 明亮清新風 (預設) 與 深色星艦風 一鍵無縫切換
+       CSS 變數系統：大廳五 專屬 琥珀金 (Amber Gold) 雙主題架構
        ========================================================= */
     :root, [data-theme="light"] {
-      --bg-gradient: radial-gradient(circle at 50% 0%, #f0fdf4 0%, #e2e8f0 40%, #cbd5e1 100%);
-      --body-bg: #f8fafc;
-      --card-bg: #ffffff;
-      --card-border: #e2e8f0;
-      --card-shadow: 0 4px 20px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.04);
-      --card-shadow-hover: 0 12px 32px rgba(0, 0, 0, 0.12);
+      --primary-color: #d97706;
+      --primary-hover: #b45309;
+      --bg-gradient: linear-gradient(135deg, #fffbeb 0%, #fef3c7 100%);
+      --body-bg: #fffdf5;
+      --card-bg: rgba(255, 255, 255, 0.95);
+      --card-border: rgba(217, 119, 6, 0.22);
+      --card-shadow: 0 4px 20px rgba(217, 119, 6, 0.08), 0 1px 3px rgba(0, 0, 0, 0.04);
+      --card-shadow-hover: 0 12px 32px rgba(217, 119, 6, 0.16);
       
-      --text-main: #0f172a;
-      --text-muted: #475569;
-      --text-sub: #64748b;
+      --text-main: #78350f;
+      --text-muted: #92400e;
+      --text-sub: #b45309;
       
-      --desc-box-bg: #f8fafc;
-      --desc-box-border: #e2e8f0;
+      --desc-box-bg: #fffbeb;
+      --desc-box-border: #fde68a;
       
       --nav-chip-bg: #ffffff;
-      --nav-chip-border: #cbd5e1;
-      --nav-chip-text: #334155;
-      --nav-chip-hover: #f1f5f9;
-      --nav-chip-active-bg: #dbeafe;
-      --nav-chip-active-border: #2563eb;
-      --nav-chip-active-text: #1d4999;
+      --nav-chip-border: #fcd34d;
+      --nav-chip-text: #92400e;
+      --nav-chip-hover: #fef3c7;
+      --nav-chip-active-bg: #f59e0b;
+      --nav-chip-active-border: #d97706;
+      --nav-chip-active-text: #ffffff;
       
-      --accent-badge-bg: #f1f5f9;
-      --accent-badge-text: #475569;
-      --accent-badge-border: #cbd5e1;
+      --accent-badge-bg: #fef3c7;
+      --accent-badge-text: #92400e;
+      --accent-badge-border: #fcd34d;
 
       --theme-toggle-bg: #ffffff;
-      --theme-toggle-border: #cbd5e1;
-      --theme-toggle-text: #0f172a;
+      --theme-toggle-border: #fcd34d;
+      --theme-toggle-text: #78350f;
     }
 
     [data-theme="dark"] {
-      --bg-gradient: radial-gradient(circle at 50% 0%, #1e293b 0%, #090d16 80%);
-      --body-bg: #090d16;
-      --card-bg: #111827;
-      --card-border: rgba(255, 255, 255, 0.08);
-      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
-      --card-shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.6);
+      --primary-color: #f59e0b;
+      --primary-hover: #d97706;
+      --bg-gradient: linear-gradient(135deg, #181206 0%, #0d0a03 100%);
+      --body-bg: #0d0a03;
+      --card-bg: rgba(30, 22, 10, 0.85);
+      --card-border: rgba(245, 158, 11, 0.22);
+      --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      --card-shadow-hover: 0 16px 40px rgba(245, 158, 11, 0.25);
       
-      --text-main: #f8fafc;
-      --text-muted: #94a3b8;
-      --text-sub: #cbd5e1;
+      --text-main: #fef3c7;
+      --text-muted: #fde68a;
+      --text-sub: #f59e0b;
       
-      --desc-box-bg: rgba(15, 23, 42, 0.6);
-      --desc-box-border: rgba(255, 255, 255, 0.05);
+      --desc-box-bg: rgba(45, 30, 10, 0.6);
+      --desc-box-border: rgba(245, 158, 11, 0.2);
       
       --nav-chip-bg: rgba(255, 255, 255, 0.05);
-      --nav-chip-border: rgba(255, 255, 255, 0.1);
-      --nav-chip-text: #cbd5e1;
-      --nav-chip-hover: rgba(255, 255, 255, 0.12);
-      --nav-chip-active-bg: rgba(245, 158, 11, 0.2);
-      --nav-chip-active-border: #f59e0b;
-      --nav-chip-active-text: #f59e0b;
+      --nav-chip-border: rgba(245, 158, 11, 0.2);
+      --nav-chip-text: #fef3c7;
+      --nav-chip-hover: rgba(245, 158, 11, 0.15);
+      --nav-chip-active-bg: #f59e0b;
+      --nav-chip-active-border: #d97706;
+      --nav-chip-active-text: #ffffff;
       
-      --accent-badge-bg: rgba(255, 255, 255, 0.08);
-      --accent-badge-text: #cbd5e1;
-      --accent-badge-border: rgba(255, 255, 255, 0.12);
+      --accent-badge-bg: rgba(245, 158, 11, 0.15);
+      --accent-badge-text: #fef3c7;
+      --accent-badge-border: rgba(245, 158, 11, 0.25);
 
-      --theme-toggle-bg: #1e293b;
-      --theme-toggle-border: #475569;
-      --theme-toggle-text: #f8fafc;
+      --theme-toggle-bg: #1e160a;
+      --theme-toggle-border: #78350f;
+      --theme-toggle-text: #fef3c7;
     }
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
@@ -112,14 +116,14 @@
       border-radius: 9999px;
       font-size: 0.82rem;
       font-weight: 700;
-      background: rgba(14, 165, 233, 0.12);
-      color: #0284c7;
-      border: 1px solid rgba(14, 165, 233, 0.3);
+      background: rgba(245, 158, 11, 0.15);
+      color: #b45309;
+      border: 1px solid rgba(245, 158, 11, 0.35);
     }
     [data-theme="dark"] .badge-portal {
-      background: rgba(245, 158, 11, 0.15);
-      color: #f59e0b;
-      border-color: rgba(245, 158, 11, 0.3);
+      background: rgba(245, 158, 11, 0.2);
+      color: #fbbf24;
+      border-color: rgba(245, 158, 11, 0.4);
     }
 
     /* 主題切換按鈕 */
@@ -153,7 +157,10 @@
       font-weight: 900;
       letter-spacing: -0.5px;
       margin-bottom: 8px;
-      color: var(--text-main);
+      color: #b45309;
+    }
+    [data-theme="dark"] h1 {
+      color: #fbbf24;
     }
 
     /* 頂部快速跨大廳切換導覽列 (平鋪於各種裝置) */
