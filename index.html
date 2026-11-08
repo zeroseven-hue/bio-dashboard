@@ -492,10 +492,13 @@
     <!-- 頂部工具條：左側大廳標籤、右側一鍵切換【明亮清新 / 科技深色】 -->
     <div class="top-bar-controls">
       <div class="badge-portal">🧬 生物教學與互動神器庫（GitHub Pages）</div>
-      <button id="themeToggleBtn" class="theme-switch-btn" type="button" aria-label="切換顏色主題">
+      <div style="display:flex; gap:8px; align-items:center;">
+        <button id="btnTeacherPinLock" class="theme-switch-btn" type="button" style="background:#1e293b; color:#f8fafc; border-color:#475569;" onclick="toggleTeacherPinLock()">🔒 教師管理鎖</button>
+        <button id="themeToggleBtn" class="theme-switch-btn" type="button" aria-label="切換顏色主題">
         <span id="themeIcon">☀️</span>
         <span id="themeText">切換為明亮模式</span>
       </button>
+          </div>
     </div>
 
     <!-- 頂部標題 (乾淨俐落，無多餘說教引導文字) -->
@@ -799,6 +802,17 @@
         setup();
       }
     })();
+  
+    function toggleTeacherPinLock() {
+      const cur = localStorage.getItem('teacher_global_pin') || '8088';
+      const pwd = prompt('🔒 請輸入教師管理解鎖密碼：');
+      if (pwd === cur) {
+        alert('✅ 密碼正確，已解鎖教師管理功能！');
+      } else if (pwd !== null) {
+        alert('❌ 密碼錯誤，請重新確認！');
+      }
+    }
+    
   </script>
 
 
