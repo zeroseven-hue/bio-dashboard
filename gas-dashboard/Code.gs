@@ -228,8 +228,8 @@ function doPost(e) {
     var rawClass = String(data.className || "").trim();
     var unitTitle = String(data.units || data.gameTitle || "").trim();
 
-    // 1️⃣ 第一軌：尋找或建立該學生的【班級專屬分頁】（如 701, 702, 七乙, 七丙）
-    // 進行「座號就地更新 (In-Place Update)」，一人一列，保持乾淨排序！
+    // 1. 第一軌：尋找或建立該學生的班級專屬分頁（如 701, 702, 七甲, 七乙, 七丙）
+    // 進行座號就地更新 (In-Place Update)，一人一列，保持乾淨排序！
     var classSheet = null;
     if (rawClass) {
       classSheet = ss.getSheetByName(rawClass);
@@ -247,7 +247,7 @@ function doPost(e) {
       classRes = saveRecordToSheet(classSheet, data, true);
     }
 
-    // 2️⃣ 第二軌：同步寫入【單元分頁】或【所有成績彙整】/【測驗成績紀錄】總表
+    // 2. 第二軌：同步寫入單元分頁或【所有成績彙整】/【測驗成績紀錄】總表
     var secondarySheetName = cleanSheetName(unitTitle);
     if (!secondarySheetName || secondarySheetName === "測驗成績紀錄") {
       secondarySheetName = ss.getSheetByName("所有成績彙整") ? "所有成績彙整" : "測驗成績紀錄";
